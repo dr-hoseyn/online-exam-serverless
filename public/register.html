@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت‌نام - سیستم آزمون آنلاین</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-6">ثبت‌نام</h2>
+            
+            <form id="registerForm" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">نام کاربری</label>
+                    <input type="text" id="username" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">ایمیل</label>
+                    <input type="email" id="email" required 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">رمز عبور</label>
+                    <input type="password" id="password" required minlength="6"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <p class="text-sm text-gray-500 mt-1">حداقل 6 کاراکتر</p>
+                </div>
+
+                <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"></div>
+                <div id="successMessage" class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"></div>
+                
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                    ثبت‌نام
+                </button>
+            </form>
+
+            <p class="mt-6 text-center text-gray-600">
+                قبلاً ثبت‌نام کرده‌اید؟ 
+                <a href="/login.html" class="text-indigo-600 hover:text-indigo-800 font-medium">ورود</a>
+            </p>
+            
+            <p class="mt-4 text-center">
+                <a href="/index.html" class="text-gray-500 hover:text-gray-700">بازگشت به صفحه اصلی</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // مدیریت فرم ثبت‌نام
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    successDiv.textContent = data.message || 'ثبت‌نام با موفقیت انجام شد';
+                    successDiv.classList.remove('hidden');
+                    
+                    // ذخیره token
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // ریدایرکت بعد از 1 ثانیه
+                    setTimeout(() => {
+                        if (data.user.role === 'admin') {
+                            window.location.href = '/admin.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    }, 1000);
+                } else {
+                    errorDiv.textContent = data.error || 'خطا در ثبت‌نام';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'خطا در ارتباط با سرور';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد - سیستم آزمون آنلاین</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-indigo-600">داشبورد کاربر</h1>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <span id="userName" class="text-gray-700"></span>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                        خروج
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- User Info Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">اطلاعات کاربری</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div>
+                    <p class="text-gray-600">نام کاربری</p>
+                    <p id="username" class="text-xl font-semibold text-gray-800"></p>
+                </div>
+                <div>
+                    <p class="text-gray-600">امتیاز کل</p>
+                    <p id="totalScore" class="text-xl font-semibold text-indigo-600">0</p>
+                </div>
+                <div>
+                    <a href="/leaderboard.html" class="inline-block bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">
+                        مشاهده رتبه‌بندی
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">آزمون‌ها</h2>
+            <div id="examInfo" class="mb-4">
+                <p class="text-gray-600">در حال بارگذاری...</p>
+            </div>
+            <button id="startExamBtn" onclick="startExam()" 
+                    class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-medium disabled:bg-gray-400 disabled:cursor-not-allowed">
+                شروع آزمون
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">نتایج قبلی</h2>
+            <div id="resultsContainer">
+                <p class="text-gray-600">در حال بارگذاری...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        // بررسی احراز هویت
+        if (!isAuthenticated()) {
+            window.location.href = '/login.html';
+        }
+
+        const user = getCurrentUser();
+        if (user.role === 'admin') {
+            window.location.href = '/admin.html';
+        }
+
+        // نمایش اطلاعات کاربر
+        document.getElementById('userName').textContent = user.username;
+        document.getElementById('username').textContent = user.username;
+        document.getElementById('totalScore').textContent = user.totalScore || 0;
+
+        // بارگذاری اطلاعات آزمون
+        async function loadExamInfo() {
+            try {
+                const response = await fetch('/api/exam/questions', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const examInfo = document.getElementById('examInfo');
+                    
+                    if (data.questions.length > 0) {
+                        examInfo.innerHTML = `
+                            <p class="text-gray-700 mb-2">تعداد سوالات: <span class="font-semibold">${data.total}</span></p>
+                            <p class="text-gray-600">زمان آزمون: 30 دقیقه</p>
+                        `;
+                        document.getElementById('startExamBtn').disabled = false;
+                    } else {
+                        examInfo.innerHTML = '<p class="text-yellow-600">هنوز سوالی در سیستم وجود ندارد. لطفاً منتظر بمانید.</p>';
+                        document.getElementById('startExamBtn').disabled = true;
+                    }
+                }
+            } catch (error) {
+                console.error('خطا در بارگذاری اطلاعات آزمون:', error);
+            }
+        }
+
+        // بارگذاری نتایج
+        async function loadResults() {
+            try {
+                const response = await fetch('/api/exam/results', {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const container = document.getElementById('resultsContainer');
+                    
+                    if (data.results.length === 0) {
+                        container.innerHTML = '<p class="text-gray-600">هنوز نتیجه‌ای ثبت نشده است.</p>';
+                    } else {
+                        const resultsHTML = data.results.map(result => `
+                            <div class="border-b border-gray-200 py-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-semibold text-gray-800">نمره: ${result.score}%</p>
+                                        <p class="text-sm text-gray-600">${result.correctAnswers} از ${result.totalQuestions} سوال صحیح</p>
+                                    </div>
+                                    <p class="text-gray-500">${new Date(result.date).toLocaleDateString('fa-IR')}</p>
+                                </div>
+                            </div>
+                        `).join('');
+                        container.innerHTML = resultsHTML;
+                    }
+                }
+            } catch (error) {
+                console.error('خطا در بارگذاری نتایج:', error);
+            }
+        }
+
+        // شروع آزمون
+        function startExam() {
+            window.location.href = '/exam.html';
+        }
+
+        // بارگذاری داده‌ها
+        loadExamInfo();
+        loadResults();
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون - سیستم آزمون آنلاین</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-indigo-600">آزمون آنلاین</h1>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <div class="bg-red-100 px-4 py-2 rounded-lg">
+                        <span class="text-red-700 font-semibold">زمان باقی‌مانده: </span>
+                        <span id="timer" class="text-red-700 font-bold text-xl">30:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div id="loadingMessage" class="text-center py-8">
+                <p class="text-gray-600">در حال بارگذاری سوالات...</p>
+            </div>
+
+            <form id="examForm" class="hidden">
+                <div id="questionsContainer" class="space-y-6 mb-6"></div>
+                
+                <div class="flex justify-between items-center pt-6 border-t">
+                    <button type="button" onclick="window.location.href='/dashboard.html'" 
+                            class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition">
+                        انصراف
+                    </button>
+                    <button type="submit" 
+                            class="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition font-medium">
+                        ارسال پاسخ‌ها
+                    </button>
+                </div>
+            </form>
+
+            <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mt-4"></div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/exam.js"></script>
+</body>
+</html>
+

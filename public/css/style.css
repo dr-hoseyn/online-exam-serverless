@@ -1,0 +1,119 @@
+/* استایل‌های سفارشی برای سیستم آزمون آنلاین */
+
+/* فونت فارسی */
+body {
+    font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+}
+
+/* انیمیشن‌های سفارشی */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* استایل برای رادیو باتن‌های سوالات */
+input[type="radio"]:checked + span {
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+/* استایل برای جداول */
+table {
+    border-collapse: collapse;
+}
+
+th {
+    font-weight: 600;
+    color: #374151;
+}
+
+/* استایل برای کارت‌ها */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* استایل برای دکمه‌ها */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* استایل برای تایمر */
+#timer {
+    font-variant-numeric: tabular-nums;
+}
+
+/* استایل برای پیام‌های خطا و موفقیت */
+.alert {
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* استایل برای فیلدهای فرم */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* استایل برای جداول responsive */
+@media (max-width: 768px) {
+    table {
+        font-size: 0.875rem;
+    }
+    
+    th, td {
+        padding: 0.5rem;
+    }
+}
+
+/* استایل برای رتبه‌بندی */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+}
+
+/* استایل برای تب‌ها */
+.tab-content {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* استایل برای لودینگ */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(79, 70, 229, 0.3);
+    border-radius: 50%;
+    border-top-color: #4f46e5;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+

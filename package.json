@@ -1,0 +1,24 @@
+{
+  "name": "online-exam-system",
+  "version": "1.0.0",
+  "description": "سیستم آزمون آنلاین با امتیازدهی - پروژه Serverless",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'"
+  },
+  "keywords": [
+    "exam",
+    "online",
+    "serverless",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3"
+  }
+}
+
