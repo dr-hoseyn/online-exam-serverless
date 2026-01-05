@@ -12,7 +12,7 @@ if (!isAuthenticated()) {
 // بارگذاری سوالات
 async function loadQuestions() {
     try {
-        const response = await fetch('/api/exam/questions', {
+        const response = await fetch('/api/exam', {
             headers: {
                 'Authorization': `Bearer ${getToken()}`
             }
@@ -122,7 +122,7 @@ async function submitExam(isAuto = false) {
     form.innerHTML = '<p class="text-center py-8 text-gray-600">در حال ارسال پاسخ‌ها...</p>';
 
     try {
-        const response = await fetch('/api/exam/submit', {
+        const response = await fetch('/api/exam', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

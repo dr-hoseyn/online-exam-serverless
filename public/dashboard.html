@@ -82,10 +82,10 @@
         document.getElementById('username').textContent = user.username;
         document.getElementById('totalScore').textContent = user.totalScore || 0;
 
-        // بارگذاری اطلاعات آزمون
+        // بارگذاری اطلاعات آزمون (بر اساس یک دوره پیش‌فرض یا همه سوالات)
         async function loadExamInfo() {
             try {
-                const response = await fetch('/api/exam/questions', {
+                const response = await fetch('/api/exam', {
                     headers: {
                         'Authorization': `Bearer ${getToken()}`
                     }
@@ -114,7 +114,7 @@
         // بارگذاری نتایج
         async function loadResults() {
             try {
-                const response = await fetch('/api/exam/results', {
+                const response = await fetch('/api/exam?results=1', {
                     headers: {
                         'Authorization': `Bearer ${getToken()}`
                     }
