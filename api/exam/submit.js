@@ -1,4 +1,4 @@
-// API Route برای ارسال پاسخ‌ها و محاسبه نمره
+// API Route برای ارسال پاسخ‌ها و محاسبه نمره برای یک دوره مشخص
 const { connectToDatabase } = require('../db');
 const { requireAuth } = require('../utils/auth');
 const { ObjectId } = require('mongodb');
@@ -14,6 +14,16 @@ module.exports = async (req, res) => {
     const user = requireAuth(req, res);
     if (!user) return;
 
+    const { courseId } = req.query || {};
+
+    if (!courseId) {
+      return res.status(400).json({ error: 'courseId الزامی است' });
+    }
+
+    if (!ObjectId.isValid(courseId)) {
+      return res.status(400).json({ error: 'courseId نامعتبر است' });
+    }
+
     const { answers } = req.body; // answers: [{ questionId, answerIndex }]
 
     if (!answers || !Array.isArray(answers)) {
@@ -25,16 +35,20 @@ module.exports = async (req, res) => {
     const resultsCollection = db.collection('results');
     const usersCollection = db.collection('users');
 
-    // دریافت همه سوالات با پاسخ صحیح
-    const allQuestions = await questionsCollection.find({}).toArray();
+    // دریافت سوالات مربوط به این دوره با پاسخ صحیح
+    const allQuestions = await questionsCollection
+      .find({ courseId: new ObjectId(courseId) })
+      .toArray();
 
     if (allQuestions.length === 0) {
-      return res.status(400).json({ error: 'هیچ سوالی در سیستم وجود ندارد' });
+      return res
+        .status(400)
+        .json({ error: 'هیچ سوالی برای این دوره در سیستم وجود ندارد' });
     }
 
     // ایجاد Map برای دسترسی سریع به سوالات
     const questionsMap = new Map();
-    allQuestions.forEach(q => {
+    allQuestions.forEach((q) => {
       questionsMap.set(q._id.toString(), q);
     });
 
@@ -54,10 +68,11 @@ module.exports = async (req, res) => {
     // ذخیره نتیجه
     const result = {
       userId: new ObjectId(user.userId),
+      courseId: new ObjectId(courseId),
       score,
       correctAnswers,
       totalQuestions,
-      date: new Date()
+      date: new Date(),
     };
 
     await resultsCollection.insertOne(result);
@@ -69,16 +84,16 @@ module.exports = async (req, res) => {
     );
 
     // دریافت totalScore به‌روز شده
-    const updatedUser = await usersCollection.findOne(
-      { _id: new ObjectId(user.userId) }
-    );
+    const updatedUser = await usersCollection.findOne({
+      _id: new ObjectId(user.userId),
+    });
 
     res.status(200).json({
       message: 'آزمون با موفقیت ثبت شد',
       score,
       correctAnswers,
       totalQuestions,
-      totalScore: updatedUser.totalScore || 0
+      totalScore: updatedUser.totalScore || 0,
     });
   } catch (error) {
     console.error('خطا در ثبت آزمون:', error);

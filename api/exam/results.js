@@ -1,4 +1,5 @@
 // API Route برای دریافت نتایج کاربر
+// حالا هر نتیجه به یک دوره (course) وابسته است
 const { connectToDatabase } = require('../db');
 const { requireAuth } = require('../utils/auth');
 const { ObjectId } = require('mongodb');
@@ -24,17 +25,18 @@ module.exports = async (req, res) => {
       .toArray();
 
     // فرمت کردن نتایج
-    const formattedResults = results.map(r => ({
+    const formattedResults = results.map((r) => ({
       id: r._id.toString(),
+      courseId: r.courseId ? r.courseId.toString() : null,
       score: r.score,
       correctAnswers: r.correctAnswers,
       totalQuestions: r.totalQuestions,
-      date: r.date
+      date: r.date,
     }));
 
     res.status(200).json({
       results: formattedResults,
-      total: formattedResults.length
+      total: formattedResults.length,
     });
   } catch (error) {
     console.error('خطا در دریافت نتایج:', error);

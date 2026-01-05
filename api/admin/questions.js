@@ -1,4 +1,5 @@
 // API Route برای مدیریت سوالات (Admin)
+// هر سوال به یک دوره (course) وابسته است
 const { connectToDatabase } = require('../db');
 const { requireAuth } = require('../utils/auth');
 const { ObjectId } = require('mongodb');
@@ -11,6 +12,7 @@ module.exports = async (req, res) => {
 
     const { db } = await connectToDatabase();
     const questionsCollection = db.collection('questions');
+    const coursesCollection = db.collection('courses');
 
     // GET: دریافت همه سوالات
     if (req.method === 'GET') {
@@ -19,23 +21,24 @@ module.exports = async (req, res) => {
         .sort({ createdAt: -1 })
         .toArray();
 
-      const formattedQuestions = questions.map(q => ({
+      const formattedQuestions = questions.map((q) => ({
         id: q._id.toString(),
+        courseId: q.courseId ? q.courseId.toString() : null,
         question: q.question,
         options: q.options,
         correctAnswer: q.correctAnswer,
-        createdAt: q.createdAt
+        createdAt: q.createdAt,
       }));
 
       return res.status(200).json({
         questions: formattedQuestions,
-        total: formattedQuestions.length
+        total: formattedQuestions.length,
       });
     }
 
     // POST: افزودن سوال جدید
     if (req.method === 'POST') {
-      const { question, options, correctAnswer } = req.body;
+      const { question, options, correctAnswer, courseId } = req.body || {};
 
       // اعتبارسنجی
       if (!question || !options || !Array.isArray(options) || options.length !== 4) {
@@ -46,11 +49,25 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'پاسخ صحیح باید بین 0 تا 3 باشد' });
       }
 
+      if (!courseId || !ObjectId.isValid(courseId)) {
+        return res.status(400).json({ error: 'courseId معتبر ارسال کنید' });
+      }
+
+      // اطمینان از وجود دوره
+      const course = await coursesCollection.findOne({
+        _id: new ObjectId(courseId),
+      });
+
+      if (!course) {
+        return res.status(404).json({ error: 'دوره مورد نظر یافت نشد' });
+      }
+
       const newQuestion = {
+        courseId: new ObjectId(courseId),
         question,
         options,
         correctAnswer: parseInt(correctAnswer),
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       const result = await questionsCollection.insertOne(newQuestion);
@@ -59,8 +76,8 @@ module.exports = async (req, res) => {
         message: 'سوال با موفقیت افزوده شد',
         question: {
           id: result.insertedId.toString(),
-          ...newQuestion
-        }
+          ...newQuestion,
+        },
       });
     }
 
@@ -73,7 +90,7 @@ module.exports = async (req, res) => {
       }
 
       const result = await questionsCollection.deleteOne({
-        _id: new ObjectId(questionId)
+        _id: new ObjectId(questionId),
       });
 
       if (result.deletedCount === 0) {
